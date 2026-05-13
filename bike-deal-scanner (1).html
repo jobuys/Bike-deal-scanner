@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bike Deal Scanner</title>
+<style>
+:root{
+  --bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#242424;
+  --border:#2e2e2e;--border2:#3a3a3a;
+  --text:#e8e8e8;--text2:#999;--text3:#555;
+  --green:#4ade80;--green-bg:rgba(74,222,128,0.1);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,0.1);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.1);
+  --r:10px;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.hdr{padding:18px 24px 0;border-bottom:1px solid var(--border);}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;}
+.logo{font-size:17px;font-weight:600;letter-spacing:-.3px;}
+.logo span{color:var(--green);}
+.hdr-sub{font-size:12px;color:var(--text3);margin-top:3px;}
+.key-btn{font-size:12px;cursor:pointer;padding:5px 11px;border:1px solid var(--border);border-radius:99px;background:none;color:var(--text2);transition:all .15s;white-space:nowrap;}
+.key-btn:hover{color:var(--text);border-color:var(--border2);}
+.key-btn.ok{color:var(--green);border-color:rgba(74,222,128,.3);background:var(--green-bg);}
+.tabs{display:flex;overflow-x:auto;}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+.content{padding:22px;max-width:1040px;margin:0 auto;}
+.panel{display:none;}
+.panel.active{display:block;}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
+@media(max-width:720px){.metrics{grid-template-columns:1fr 1fr;}}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;}
+.mlabel{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.mvalue{font-size:20px;font-weight:600;letter-spacing:-.4px;}
+.mvalue.g{color:var(--green);}
+.msub{font-size:11px;color:var(--text3);margin-top:2px;}
+.slabel{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px;}
+.top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+@media(max-width:600px){.top-grid{grid-template-columns:1fr 1fr;}}
+.top-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;}
+.tc-name{font-size:13px;font-weight:500;margin-bottom:3px;line-height:1.3;}
+.tc-stats{font-size:12px;color:var(--text2);}
+.tc-stats b{color:var(--green);font-weight:600;}
+.ins-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;}
+@media(max-width:600px){.ins-row{grid-template-columns:1fr;}}
+.ins-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.ins-item:last-child{border-bottom:none;}
+.ins-lbl{color:var(--text2);}
+.ins-val{font-weight:600;}
+.search-banner{background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,.2);border-radius:var(--rs);padding:12px 15px;font-size:13px;color:#60a5fa;margin-bottom:18px;line-height:1.6;}
+.search-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+@media(max-width:600px){.search-grid{grid-template-columns:1fr;}}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px;transition:border-color .15s;}
+.sc:hover{border-color:var(--border2);}
+.ppill{display:inline-block;font-size:11px;font-weight:600;background:var(--green-bg);color:var(--green);padding:2px 9px;border-radius:99px;margin-bottom:7px;}
+.sc h3{font-size:13px;font-weight:600;margin-bottom:4px;}
+.sc p{font-size:12px;color:var(--text2);margin-bottom:11px;line-height:1.5;}
+.obtn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;padding:7px 13px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);text-decoration:none;transition:all .15s;}
+.obtn:hover{background:#2a2a2a;border-color:#444;}
+.obtn svg{width:13px;height:13px;flex-shrink:0;}
+.ahint{font-size:13px;color:var(--text2);margin-bottom:13px;line-height:1.6;}
+textarea{width:100%;min-height:150px;padding:13px;font-size:14px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);resize:vertical;line-height:1.6;transition:border-color .15s;}
+textarea:focus{outline:none;border-color:var(--green);}
+textarea::placeholder{color:var(--text3);}
+.abtn{margin-top:11px;padding:10px 20px;background:var(--green);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;color:#000;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;}
+.abtn:hover{background:#22c55e;}
+.abtn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
+.rbox{margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:17px 19px;}
+.rhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;padding-bottom:13px;border-bottom:1px solid var(--border);}
+.rtitle{font-size:14px;font-weight:600;}
+.vbadge{padding:4px 13px;border-radius:99px;font-size:13px;font-weight:700;}
+.vHOT{background:var(--green-bg);color:var(--green);border:1px solid rgba(74,222,128,.3);}
+.vWARM{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(251,191,36,.3);}
+.vPASS{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.3);}
+.rtext{font-size:14px;line-height:1.8;white-space:pre-wrap;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:12px;font-weight:500;color:var(--text2);}
+.fg input,.fg select{padding:9px 12px;font-size:14px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);transition:border-color .15s;}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--green);}
+.fg input::placeholder{color:var(--text3);}
+.fg select option{background:var(--bg3);}
+.sold-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:18px;}
+.sold-section h4{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px;}
+.toggle-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:16px;cursor:pointer;}
+.toggle-row input{accent-color:var(--green);width:15px;height:15px;}
+.sbtn{padding:10px 22px;background:var(--green);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;color:#000;cursor:pointer;transition:all .15s;}
+.sbtn:hover{background:#22c55e;}
+.fmsg{margin-top:11px;font-size:13px;padding:10px 14px;border-radius:var(--rs);}
+.fmsg.ok{background:var(--green-bg);color:var(--green);}
+.fmsg.err{background:var(--red-bg);color:var(--red);}
+.frow{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.fbtn{padding:4px 12px;font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:99px;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;}
+.fbtn:hover{color:var(--text);border-color:var(--border2);}
+.fbtn.active{background:var(--green-bg);color:var(--green);border-color:rgba(74,222,128,.3);}
+.twrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:9px 13px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg2);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.ph{color:var(--green);font-weight:600;}
+.pm{color:var(--amber);font-weight:600;}
+.pl{color:var(--text2);}
+.pn{color:var(--red);font-weight:600;}
+.bdg{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;}
+.bsold{background:var(--green-bg);color:var(--green);}
+.blisted{background:var(--amber-bg);color:var(--amber);}
+.totals-bar{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
+.tcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 15px;font-size:13px;}
+.tcard span{color:var(--text2);margin-right:6px;}
+.tcard b{color:var(--green);}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:26px;max-width:440px;width:100%;}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:7px;}
+.modal p{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;}
+.modal input{width:100%;padding:11px 13px;font-size:14px;font-family:monospace;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:9px;}
+.modal input:focus{outline:none;border-color:var(--green);}
+.mrem{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-bottom:15px;cursor:pointer;}
+.mrem input{accent-color:var(--green);}
+.mbtn{width:100%;padding:11px;background:var(--green);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;color:#000;cursor:pointer;}
+.mbtn:hover{background:#22c55e;}
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+code{font-family:monospace;font-size:12px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green);}
+</style>
+</head>
+<body>
+
+<div class="modal-bg" id="key-modal" style="display:none">
+  <div class="modal">
+    <h2>🔑 Enter your API key</h2>
+    <p>Your Anthropic API key powers the Ad Analyser. It's stored only in your browser — never in the page code.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-api03-..." />
+    <label class="mrem"><input type="checkbox" id="key-rem" checked> Remember on this device</label>
+    <button class="mbtn" onclick="saveKey()">Save &amp; continue</button>
+  </div>
+</div>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="logo">Bike Deal <span>Scanner</span></div>
+      <div class="hdr-sub" id="hdr-sub">Loading…</div>
+    </div>
+    <button class="key-btn" id="key-btn" onclick="document.getElementById('key-modal').style.display='flex'">⚿ API key</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard',this)">Dashboard</button>
+    <button class="tab" onclick="switchTab('search',this)">Search links</button>
+    <button class="tab" onclick="switchTab('analyser',this)">Ad analyser</button>
+    <button class="tab" onclick="switchTab('log',this)">Log a bike</button>
+    <button class="tab" onclick="switchTab('history',this)">Sales history</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard" class="panel active">
+    <div class="metrics" id="metrics"></div>
+    <div class="slabel">Top performers by profit</div>
+    <div class="top-grid" id="top-grid"></div>
+    <div class="slabel">Insights</div>
+    <div class="ins-row" id="ins-row"></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="tab-search" class="panel">
+    <div class="search-banner">
+      📍 <strong>Location:</strong> When the Gumtree page loads, use the distance filter on the left sidebar — set postcode to <strong>HA2 7LT</strong> and radius to <strong>75 miles</strong>. Gumtree doesn't allow this to be pre-set in a link, but it remembers your setting for that session once you've done it once.
+    </div>
+    <div class="search-grid" id="search-grid"></div>
+  </div>
+
+  <!-- ANALYSER -->
+  <div id="tab-analyser" class="panel">
+    <p class="ahint">Paste any Gumtree listing — title, price, description. The AI scores it against your full sales history and estimates profit potential.</p>
+    <textarea id="listing-input" placeholder="e.g.&#10;Giant TCR Advanced 2 — £350&#10;2020 model, Shimano 105, carbon fork, 56cm. Some light scratches but rides perfectly. Collection only Basingstoke."></textarea>
+    <button class="abtn" id="abtn" onclick="analyseListing()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Analyse this listing
+    </button>
+    <div id="result-area"></div>
+  </div>
+
+  <!-- LOG A BIKE -->
+  <div id="tab-log" class="panel">
+    <div class="card" style="margin-bottom:18px;">
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Log a new purchase or sale below. After saving, a ready-to-paste code line will appear — copy it into your <code>bike-deal-scanner.html</code> file above the <code>// ADD NEW BIKES BELOW THIS LINE</code> comment to make it permanent.</p>
+    </div>
+    <div class="slabel">Purchase details</div>
+    <div class="form-grid">
+      <div class="fg"><label>Bike name *</label><input id="f-bike" type="text" placeholder="e.g. Giant TCR Advanced 2"></div>
+      <div class="fg"><label>Purchase price £ *</label><input id="f-bought" type="number" min="0" step="0.5" placeholder="350"></div>
+      <div class="fg"><label>Expenses £ (parts, tools etc)</label><input id="f-exp" type="number" min="0" step="0.5" placeholder="0"></div>
+      <div class="fg"><label>Notes</label><input id="f-notes" type="text" placeholder="e.g. Needs new chain"></div>
+    </div>
+    <label class="toggle-row">
+      <input type="checkbox" id="f-sold-toggle" onchange="toggleSoldFields()">
+      This bike has already sold
+    </label>
+    <div class="sold-section" id="sold-fields" style="display:none">
+      <h4>Sale details</h4>
+      <div class="form-grid">
+        <div class="fg"><label>Sale price £ *</label><input id="f-sold" type="number" min="0" step="0.5" placeholder="600"></div>
+        <div class="fg"><label>Delivery income £</label><input id="f-delivery" type="number" min="0" step="0.5" placeholder="0"></div>
+        <div class="fg"><label>Days to sell</label><input id="f-days" type="number" min="0" placeholder="7"></div>
+      </div>
+    </div>
+    <button class="sbtn" onclick="logBike()">Save entry</button>
+    <div id="form-msg"></div>
+    <div id="log-output-section" style="display:none;margin-top:24px;">
+      <div class="slabel">Copy this line into your HTML file</div>
+      <div class="card">
+        <pre id="log-output" style="font-size:12px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:monospace;"></pre>
+        <button onclick="copyLogOutput()" style="margin-top:12px;padding:7px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:13px;cursor:pointer;">📋 Copy to clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="tab-history" class="panel">
+    <div class="frow" id="frow"></div>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Bike</th><th>Bought</th><th>Exp</th><th>Sold</th><th>Profit</th><th>Delivery</th><th>Total made</th><th>Days</th><th>Status</th><th>Notes</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="totals-bar" id="totals-bar"></div>
+  </div>
+
+</div>
+
+<script>
+// ================================================================
+//  YOUR SALES DATA — EDIT THIS SECTION TO ADD NEW BIKES
+//
+//  TO ADD A NEW PURCHASE (not yet sold):
+//  {n:60, bike:"Bike Name", bought:200, exp:0, sold:null, profit:null, delivery:0, days:null, notes:""},
+//
+//  TO RECORD A SALE — find the bike's line and update:
+//  sold:null → sold:400
+//  profit:null → profit:200  (= sold - bought - exp)
+//  days:null → days:7
+//
+//  NOTE: "PX" bikes (part-exchange) should use the actual bike name,
+//  e.g. bike:"Giant Talon (PX)" so they sort correctly by brand.
+// ================================================================
+const SALES = [
+  {n:1,  bike:"Cannondale Synapse",           bought:80,   exp:35,   sold:225,  profit:110,   delivery:0,   days:28,  notes:""},
+  {n:2,  bike:"Trek 3700",                    bought:60,   exp:4.5,  sold:135,  profit:70.5,  delivery:0,   days:7,   notes:""},
+  {n:3,  bike:"Giant Contend AR 2",           bought:300,  exp:0,    sold:535,  profit:235,   delivery:0,   days:3,   notes:""},
+  {n:4,  bike:"Specialized Sirrus X 2.0",     bought:150,  exp:0,    sold:360,  profit:210,   delivery:0,   days:1,   notes:""},
+  {n:5,  bike:"Giant Talon 2 Matcha",         bought:260,  exp:35,   sold:125,  profit:-170,  delivery:0,   days:5,   notes:"Stolen"},
+  {n:6,  bike:"Specialized Vita Disc",        bought:65,   exp:6,    sold:150,  profit:79,    delivery:0,   days:7,   notes:""},
+  {n:7,  bike:"Scott Scale 970",              bought:250,  exp:0,    sold:475,  profit:225,   delivery:0,   days:6,   notes:""},
+  {n:8,  bike:"Giant Contend SL 1",           bought:117.5,exp:21,   sold:200,  profit:61.5,  delivery:0,   days:7,   notes:""},
+  {n:9,  bike:"Trek 1.2 One Series",          bought:117.5,exp:0,    sold:140,  profit:22.5,  delivery:0,   days:21,  notes:""},
+  {n:10, bike:"Boardman MTX 8.8",             bought:135,  exp:3,    sold:230,  profit:92,    delivery:0,   days:48,  notes:""},
+  {n:11, bike:"Trek Domane AL 2 Gen 4",       bought:220,  exp:0,    sold:513,  profit:293,   delivery:100, days:22,  notes:""},
+  {n:12, bike:"Trek Domane AL 2 Gen 4",       bought:350,  exp:0,    sold:550,  profit:200,   delivery:0,   days:21,  notes:""},
+  {n:13, bike:"Vitus Nucleus 24 Youth",       bought:125,  exp:0,    sold:248,  profit:123,   delivery:0,   days:1,   notes:""},
+  {n:14, bike:"Boardman CX Comp",             bought:120,  exp:0,    sold:370,  profit:250,   delivery:0,   days:11,  notes:""},
+  {n:15, bike:"Trek 6000",                    bought:100,  exp:5,    sold:170,  profit:65,    delivery:0,   days:6,   notes:""},
+  {n:16, bike:"Giant Contend AR 4",           bought:165,  exp:35,   sold:450,  profit:250,   delivery:0,   days:22,  notes:""},
+  {n:17, bike:"BMC Roadmachine",              bought:350,  exp:0,    sold:750,  profit:400,   delivery:0,   days:25,  notes:""},
+  {n:18, bike:"Boardman Hyb 8.6",             bought:150,  exp:0,    sold:310,  profit:160,   delivery:0,   days:15,  notes:""},
+  {n:19, bike:"Specialized Sirrus X 2.0",     bought:200,  exp:142,  sold:415,  profit:73,    delivery:0,   days:5,   notes:""},
+  {n:20, bike:"Boardman Hybrid Comp",         bought:120,  exp:5,    sold:275,  profit:150,   delivery:0,   days:9,   notes:""},
+  {n:21, bike:"Boardman SLR 8.6",             bought:120,  exp:21,   sold:320,  profit:179,   delivery:0,   days:2,   notes:""},
+  {n:22, bike:"Cube Reaction Race",           bought:300,  exp:0,    sold:650,  profit:350,   delivery:0,   days:16,  notes:""},
+  {n:23, bike:"Giant Defy Advanced 3",        bought:620,  exp:59.5, sold:800,  profit:120.5, delivery:0,   days:5,   notes:"Includes part-exchange Giant Talon"},
+  {n:24, bike:"Giant Talon (PX)",             bought:0,    exp:0,    sold:615,  profit:615,   delivery:0,   days:14,  notes:"Part-exchange from deal #23"},
+  {n:25, bike:"Giant Fathom",                 bought:300,  exp:0,    sold:550,  profit:250,   delivery:0,   days:2,   notes:""},
+  {n:26, bike:"Giant Contend SL 1 Disc",      bought:325,  exp:84,   sold:639,  profit:230,   delivery:0,   days:1,   notes:""},
+  {n:27, bike:"Boardman Hyb 8.9",             bought:350,  exp:0,    sold:600,  profit:250,   delivery:0,   days:19,  notes:""},
+  {n:28, bike:"Trek FX 3",                    bought:165,  exp:21,   sold:320,  profit:134,   delivery:0,   days:2,   notes:""},
+  {n:29, bike:"Giant Contend SL disc 105",    bought:175,  exp:0,    sold:340,  profit:165,   delivery:0,   days:1,   notes:""},
+  {n:30, bike:"Specialized Sirrus Comp",      bought:250,  exp:54,   sold:450,  profit:146,   delivery:50,  days:5,   notes:""},
+  {n:31, bike:"Specialized Sirrus X 3.0",     bought:240,  exp:10,   sold:450,  profit:200,   delivery:0,   days:30,  notes:"Silver"},
+  {n:32, bike:"Orange Crush Pro 29",          bought:600,  exp:0,    sold:900,  profit:300,   delivery:0,   days:20,  notes:""},
+  {n:33, bike:"Boardman Hybrid Comp",         bought:150,  exp:30,   sold:270,  profit:90,    delivery:0,   days:31,  notes:""},
+  {n:34, bike:"Giant Talon 2 Matcha",         bought:300,  exp:0,    sold:453,  profit:153,   delivery:0,   days:16,  notes:""},
+  {n:35, bike:"Giant Roam 3",                 bought:150,  exp:0,    sold:315,  profit:165,   delivery:0,   days:11,  notes:""},
+  {n:36, bike:"Boardman Race Road",           bought:80,   exp:27,   sold:0,    profit:-107,  delivery:0,   days:14,  notes:"Bike broke — full refund issued"},
+  {n:37, bike:"Specialized Sirrus X 3.0",     bought:235,  exp:21,   sold:520,  profit:264,   delivery:30,  days:14,  notes:"Black"},
+  {n:38, bike:"Giant Defy",                   bought:100,  exp:21,   sold:200,  profit:79,    delivery:0,   days:2,   notes:"Silver"},
+  {n:39, bike:"Boardman Team Ritchey",        bought:100,  exp:21,   sold:300,  profit:179,   delivery:30,  days:7,   notes:""},
+  {n:40, bike:"Giant TCR Advanced Disc 2 M",  bought:660,  exp:0,    sold:1100, profit:440,   delivery:0,   days:1,   notes:""},
+  {n:41, bike:"Trek Domane AL2",              bought:220,  exp:0,    sold:350,  profit:130,   delivery:0,   days:6,   notes:""},
+  {n:42, bike:"Cannondale Bad Boy 2 Urban",   bought:300,  exp:0,    sold:700,  profit:400,   delivery:90,  days:22,  notes:""},
+  {n:43, bike:"Giant TCR Advanced 1 Disc Pro",bought:800,  exp:0,    sold:1400, profit:600,   delivery:0,   days:32,  notes:""},
+  {n:44, bike:"Boardman MTX 8.8",             bought:130,  exp:0,    sold:385,  profit:255,   delivery:0,   days:32,  notes:""},
+  {n:45, bike:"Giant TCR Advanced Disc 2 ML", bought:655,  exp:0,    sold:1075, profit:420,   delivery:0,   days:22,  notes:""},
+  {n:46, bike:"Cannondale CAAD12",            bought:200,  exp:46,   sold:555,  profit:309,   delivery:0,   days:17,  notes:""},
+  {n:47, bike:"Giant Roam 0",                 bought:330,  exp:52,   sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  {n:48, bike:"Giant Talon 0",                bought:330,  exp:21,   sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  {n:49, bike:"Boardman Race Carbon SRAM",    bought:200,  exp:21,   sold:450,  profit:229,   delivery:0,   days:26,  notes:""},
+  {n:50, bike:"Cannondale Topstone 3",        bought:400,  exp:63,   sold:900,  profit:437,   delivery:50,  days:3,   notes:""},
+  {n:51, bike:"Giant Fathom 1",               bought:370,  exp:36,   sold:725,  profit:319,   delivery:50,  days:null,notes:""},
+  {n:52, bike:"Giant TCR Advanced 2",         bought:450,  exp:27,   sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  {n:53, bike:"Whyte 901 V4",                 bought:400,  exp:0,    sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  {n:54, bike:"Cannondale Topstone 4 Carbon", bought:700,  exp:0,    sold:1400, profit:700,   delivery:0,   days:7,   notes:""},
+  {n:55, bike:"BMC Timemachine TMR02",        bought:425,  exp:21,   sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  {n:56, bike:"Ribble Gravel AL",             bought:570,  exp:0,    sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  {n:57, bike:"Cannondale Supersix Evo Di2",  bought:950,  exp:0,    sold:null, profit:null,  delivery:0,   days:null,notes:"Seller delivered"},
+  {n:58, bike:"Giant Defy 0 Di2",             bought:450,  exp:47,   sold:null, profit:null,  delivery:0,   days:null,notes:"New front pads £47"},
+  {n:59, bike:"Cannondale Supersix Evo 105",  bought:250,  exp:0,    sold:null, profit:null,  delivery:0,   days:null,notes:""},
+  // ADD NEW BIKES BELOW THIS LINE
+];
+// ================================================================
+//  END OF EDITABLE DATA
+// ================================================================
+
+let API_KEY = localStorage.getItem('bike_api_key') || '';
+
+function saveKey(){
+  const v = document.getElementById('key-input').value.trim();
+  if(!v.startsWith('sk-ant')){alert('Key should start with sk-ant');return;}
+  API_KEY = v;
+  if(document.getElementById('key-rem').checked) localStorage.setItem('bike_api_key',v);
+  document.getElementById('key-modal').style.display='none';
+  updateKeyBtn();
+}
+function updateKeyBtn(){
+  const b=document.getElementById('key-btn');
+  if(API_KEY){b.textContent='✓ API key set';b.classList.add('ok');}
+  else{b.textContent='⚿ API key';b.classList.remove('ok');}
+}
+
+function gUrl(q){
+  return 'https://www.gumtree.com/for-sale/sports-leisure-travel/bicycles/uk/srpsearch+'+q.replace(/\s+/g,'+')+'?sort=date';
+}
+
+// Brand extractor — skip PX prefix, get real brand
+function getBrand(bike){
+  const name = bike.replace(/\s*\(PX\)/i,'').trim();
+  return name.split(' ')[0];
+}
+
+const soldAll = SALES.filter(s=>s.profit!==null && s.sold>0);
+const soldPos = SALES.filter(s=>s.profit!==null && s.profit>0 && s.sold>0);
+
+function getBrandStats(){
+  const b={};
+  soldPos.forEach(s=>{
+    const brand=getBrand(s.bike);
+    if(!b[brand])b[brand]={profits:[],days:[],count:0};
+    b[brand].profits.push(s.profit);
+    if(s.days)b[brand].days.push(s.days);
+    b[brand].count++;
+  });
+  return Object.entries(b).map(([name,d])=>({
+    name,
+    avgProfit:d.profits.reduce((a,v)=>a+v,0)/d.profits.length,
+    avgDays:d.days.length?d.days.reduce((a,v)=>a+v,0)/d.days.length:null,
+    count:d.count,
+    total:d.profits.reduce((a,v)=>a+v,0)
+  })).sort((a,b)=>b.avgProfit-a.avgProfit);
+}
+
+function renderDashboard(){
+  const totalProfit = soldAll.reduce((a,s)=>a+s.profit,0);
+  const totalDelivery = SALES.reduce((a,s)=>a+(s.delivery||0),0);
+  const totalMade = totalProfit + totalDelivery;
+  const avgP = totalProfit/soldAll.length;
+  const dArr = soldAll.filter(s=>s.days);
+  const avgD = dArr.reduce((a,s)=>a+s.days,0)/dArr.length;
+  const inStock = SALES.filter(s=>s.profit===null).length;
+
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="mlabel">Total profit</div><div class="mvalue g">£${Math.round(totalProfit).toLocaleString()}</div><div class="msub">bike sales only</div></div>
+    <div class="metric"><div class="mlabel">Delivery income</div><div class="mvalue g">£${Math.round(totalDelivery).toLocaleString()}</div></div>
+    <div class="metric"><div class="mlabel">Total made</div><div class="mvalue g">£${Math.round(totalMade).toLocaleString()}</div><div class="msub">profit + delivery</div></div>
+    <div class="metric"><div class="mlabel">Avg profit / bike</div><div class="mvalue g">£${Math.round(avgP)}</div></div>
+    <div class="metric"><div class="mlabel">Avg days to sell</div><div class="mvalue g">${avgD.toFixed(1)}</div><div class="msub">${inStock} in stock</div></div>`;
+
+  const top6=[...soldPos].sort((a,b)=>b.profit-a.profit).slice(0,6);
+  document.getElementById('top-grid').innerHTML=top6.map(s=>`
+    <div class="top-card">
+      <div class="tc-name">${s.bike.replace(' (PX)','')}</div>
+      <div class="tc-stats"><b>£${s.profit}</b> profit · ${s.days||'?'}d</div>
+    </div>`).join('');
+
+  const brands=getBrandStats().slice(0,5);
+  const fast=[...soldPos].filter(s=>s.days).sort((a,b)=>a.days-b.days).slice(0,5);
+  document.getElementById('ins-row').innerHTML=`
+    <div class="card">
+      <div class="slabel" style="margin-bottom:10px">Best brands (avg profit)</div>
+      ${brands.map(b=>`<div class="ins-item"><span class="ins-lbl">${b.name} <span style="color:var(--text3);font-size:11px">${b.count} sold</span></span><span class="ins-val" style="color:var(--green)">£${Math.round(b.avgProfit)}</span></div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="slabel" style="margin-bottom:10px">Fastest sellers</div>
+      ${fast.map(s=>`<div class="ins-item"><span class="ins-lbl" style="font-size:12px">${s.bike.replace(' (PX)','').length>28?s.bike.replace(' (PX)','').slice(0,28)+'…':s.bike.replace(' (PX)','')}</span><span class="ins-val">${s.days}d</span></div>`).join('')}
+    </div>`;
+
+  document.getElementById('hdr-sub').textContent=`${SALES.length} bikes tracked · ${soldAll.length} sold · ${inStock} in stock`;
+}
+
+function renderSearch(){
+  const searches=[
+    {name:"Giant TCR Advanced",       q:"Giant TCR Advanced",       reason:"Your #1 category. Three sold for £420–600 profit.",        profit:"£420–600"},
+    {name:"Cannondale Topstone",      q:"Cannondale Topstone",      reason:"Topstone 3 & 4 returned £437–700 profit. Fast flips.",     profit:"£437–700"},
+    {name:"BMC road bike",            q:"BMC road bike",            reason:"Both BMCs sold for £400+. High floor, low competition.",   profit:"£400+"},
+    {name:"Cannondale road / gravel", q:"Cannondale road bike",     reason:"CAAD12 £309, Bad Boy £400. Strong brand recognition.",     profit:"£309–400"},
+    {name:"Specialized Sirrus X",     q:"Specialized Sirrus X",     reason:"Multiple sales at £200–264 profit. Reliable flipper.",     profit:"£200–264"},
+    {name:"Giant Contend / AR",       q:"Giant Contend road bike",  reason:"£165–250 profit, often selling in 1–3 days.",              profit:"£165–250"},
+    {name:"Boardman hybrid / SLR",    q:"Boardman hybrid road bike",reason:"Low buy-in. CX Comp £250, SLR £179, hybrids £150+.",      profit:"£150–260"},
+    {name:"Trek Domane AL",           q:"Trek Domane AL",           reason:"Two sold for £130–293 profit. Trusted brand.",             profit:"£130–293"},
+    {name:"Giant Fathom / Roam",      q:"Giant Fathom Roam",        reason:"Fathom £250–319, Roam £165. Quick sellers.",               profit:"£165–319"},
+    {name:"Cube road / MTB",          q:"Cube reaction race road",  reason:"Cube Reaction Race: £350 profit in 16 days.",              profit:"£350"},
+    {name:"Orange mountain bike",     q:"Orange mountain bike",     reason:"Orange Crush Pro: £300 profit. High demand brand.",        profit:"£300"},
+    {name:"Scott MTB",                q:"Scott Scale mountain bike",reason:"Scott Scale 970: £225 profit in just 6 days.",             profit:"£225"},
+  ];
+  document.getElementById('search-grid').innerHTML=searches.map(s=>`
+    <div class="sc">
+      <div class="ppill">${s.profit} avg</div>
+      <h3>${s.name}</h3>
+      <p>${s.reason}</p>
+      <a class="obtn" href="${gUrl(s.q)}" target="_blank" rel="noopener">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open on Gumtree
+      </a>
+    </div>`).join('');
+}
+
+function renderHistory(filter){
+  const brands=['All','Giant','Boardman','Specialized','Trek','Cannondale','BMC','Scott','Orange','Cube','Whyte','Ribble','Other'];
+  const mainBrands=brands.filter(b=>b!=='All'&&b!=='Other');
+  document.getElementById('frow').innerHTML=brands.map(f=>`
+    <button class="fbtn ${(!filter&&f==='All')||(filter===f)?'active':''}" onclick="renderHistory('${f==='All'?'':f}')">${f}</button>`).join('');
+
+  let data=[...SALES].reverse();
+  if(filter&&filter!=='All'){
+    data=filter==='Other'
+      ?data.filter(s=>!mainBrands.some(b=>getBrand(s.bike)===b))
+      :data.filter(s=>getBrand(s.bike)===filter);
+  }
+
+  document.getElementById('tbody').innerHTML=data.map(s=>{
+    const isSold=s.sold!==null&&s.sold>0;
+    const totalMade=isSold?(s.profit||0)+(s.delivery||0):null;
+    let pc=s.profit===null?'':s.profit>=300?'ph':s.profit>=150?'pm':s.profit>=0?'pl':'pn';
+    return `<tr>
+      <td style="color:var(--text3)">${s.n}</td>
+      <td style="font-weight:500">${s.bike}</td>
+      <td>£${s.bought}</td>
+      <td>${s.exp>0?'£'+s.exp:'—'}</td>
+      <td>${isSold?'£'+s.sold:'—'}</td>
+      <td class="${pc}">${s.profit!==null?'£'+s.profit:'—'}</td>
+      <td>${s.delivery>0?'£'+s.delivery:'—'}</td>
+      <td class="${pc}">${totalMade!==null?'£'+totalMade:'—'}</td>
+      <td>${s.days||'—'}</td>
+      <td><span class="bdg ${isSold?'bsold':'blisted'}">${isSold?'sold':'listed'}</span></td>
+      <td style="color:var(--text3);font-size:12px">${s.notes||''}</td>
+    </tr>`;
+  }).join('');
+
+  // Totals bar
+  const view=data.filter(s=>s.profit!==null&&s.sold>0);
+  const tProfit=view.reduce((a,s)=>a+s.profit,0);
+  const tDelivery=view.reduce((a,s)=>a+(s.delivery||0),0);
+  const tMade=tProfit+tDelivery;
+  document.getElementById('totals-bar').innerHTML=`
+    <div class="tcard"><span>Profit</span><b>£${Math.round(tProfit).toLocaleString()}</b></div>
+    <div class="tcard"><span>Delivery income</span><b>£${Math.round(tDelivery).toLocaleString()}</b></div>
+    <div class="tcard"><span>Total made</span><b>£${Math.round(tMade).toLocaleString()}</b></div>`;
+}
+
+function toggleSoldFields(){
+  const show=document.getElementById('f-sold-toggle').checked;
+  document.getElementById('sold-fields').style.display=show?'block':'none';
+}
+
+function logBike(){
+  const bike=document.getElementById('f-bike').value.trim();
+  const bought=parseFloat(document.getElementById('f-bought').value)||0;
+  const exp=parseFloat(document.getElementById('f-exp').value)||0;
+  const notes=document.getElementById('f-notes').value.trim();
+  const isSold=document.getElementById('f-sold-toggle').checked;
+
+  if(!bike){showMsg('err','Please enter a bike name.');return;}
+  if(!bought&&bought!==0){showMsg('err','Please enter a purchase price (use 0 for free/PX bikes).');return;}
+
+  const nextN=Math.max(...SALES.map(s=>s.n))+1;
+  let sold='null',profit='null',delivery='0',days='null';
+
+  if(isSold){
+    const sv=parseFloat(document.getElementById('f-sold').value)||0;
+    const dv=parseFloat(document.getElementById('f-delivery').value)||0;
+    const dy=parseInt(document.getElementById('f-days').value)||0;
+    if(!sv){showMsg('err','Please enter the sale price.');return;}
+    sold=sv;
+    profit=parseFloat((sv-bought-exp).toFixed(2));
+    delivery=dv;
+    days=dy||'null';
+  }
+
+  const line=`  {n:${nextN}, bike:"${bike}", bought:${bought}, exp:${exp}, sold:${sold}, profit:${profit}, delivery:${delivery}, days:${days}, notes:"${notes}"},`;
+
+  document.getElementById('log-output').textContent=line;
+  document.getElementById('log-output-section').style.display='block';
+  showMsg('ok',`✓ Entry created for ${bike}. Copy the line below into your HTML file to save it permanently.`);
+}
+
+function copyLogOutput(){
+  const text=document.getElementById('log-output').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=event.target;
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='📋 Copy to clipboard',2000);
+  });
+}
+
+function showMsg(type,msg){
+  const el=document.getElementById('form-msg');
+  el.className='fmsg '+type;
+  el.textContent=msg;
+}
+
+async function analyseListing(){
+  if(!API_KEY){document.getElementById('key-modal').style.display='flex';return;}
+  const listing=document.getElementById('listing-input').value.trim();
+  if(!listing)return;
+  const btn=document.getElementById('abtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Analysing…';
+  document.getElementById('result-area').innerHTML='';
+
+  const brandStats=getBrandStats();
+  const statsCtx=brandStats.map(b=>`${b.name}: avg profit £${Math.round(b.avgProfit)}, avg sell ${b.avgDays?Math.round(b.avgDays)+'d':'unknown'}, ${b.count} sold`).join('\n');
+  const top10=[...soldPos].sort((a,b)=>b.profit-a.profit).slice(0,10).map(s=>`${s.bike.replace(' (PX)','')}: bought £${s.bought}, sold £${s.sold}, profit £${s.profit}, ${s.days} days`).join('\n');
+  const inStock=SALES.filter(s=>s.profit===null).map(s=>s.bike.replace(' (PX)','')).join(', ');
+  const totalProfit=soldAll.reduce((a,s)=>a+s.profit,0);
+  const totalDelivery=SALES.reduce((a,s)=>a+(s.delivery||0),0);
+
+  const prompt=`You are an expert bike reseller advisor for a UK reseller based near Harrow (HA2), south of England. Analyse this Gumtree listing.
+
+RESELLER HISTORY (${soldAll.length} bikes sold):
+Total profit: £${Math.round(totalProfit).toLocaleString()}
+Total delivery income: £${Math.round(totalDelivery)}
+Total made: £${Math.round(totalProfit+totalDelivery).toLocaleString()}
+Avg profit per bike: £${Math.round(totalProfit/soldAll.length)}
+Avg days to sell: ${(soldAll.filter(s=>s.days).reduce((a,s)=>a+s.days,0)/soldAll.filter(s=>s.days).length).toFixed(1)}
+
+Brand performance:
+${statsCtx}
+
+Top 10 most profitable flips:
+${top10}
+
+Currently unsold stock: ${inStock}
+
+LISTING TO ANALYSE:
+${listing}
+
+Reply in this exact format:
+VERDICT: [HOT / WARM / PASS]
+
+ESTIMATED PROFIT: [e.g. £150–200]
+
+SUGGESTED MAX OFFER: £[amount]
+
+REASONS:
+• [reason 1]
+• [reason 2]
+• [reason 3 if needed]
+
+RED FLAGS:
+• [risks, or "None identified"]
+
+COMPARABLE SALES:
+[1-2 sentences referencing actual sales from the data above]
+
+Be direct and practical. Base estimates on comparable sales in the data.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=data.content.map(c=>c.text||'').join('\n');
+    const verdict=(text.match(/VERDICT:\s*(HOT|WARM|PASS)/i)||[])[1]?.toUpperCase()||'WARM';
+    document.getElementById('result-area').innerHTML=`
+      <div class="rbox">
+        <div class="rhdr">
+          <span class="rtitle">Analysis result</span>
+          <span class="vbadge v${verdict}">${verdict==='HOT'?'🔥':verdict==='WARM'?'⏳':'❌'} ${verdict}</span>
+        </div>
+        <div class="rtext">${text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+      </div>`;
+  }catch(e){
+    document.getElementById('result-area').innerHTML=`<div class="rbox"><p style="color:var(--red)">Error: ${e.message}</p></div>`;
+  }
+  btn.disabled=false;
+  btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analyse this listing';
+}
+
+function switchTab(t,el){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+if(!API_KEY) document.getElementById('key-modal').style.display='flex';
+updateKeyBtn();
+renderDashboard();
+renderSearch();
+renderHistory('');
+</script>
+</body>
+</html>
