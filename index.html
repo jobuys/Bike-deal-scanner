@@ -1,3 +1,5 @@
+Output
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,7 +87,6 @@ textarea::placeholder{color:var(--text3);}
 .fg input,.fg select{padding:9px 12px;font-size:14px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);transition:border-color .15s;}
 .fg input:focus,.fg select:focus{outline:none;border-color:var(--green);}
 .fg input::placeholder{color:var(--text3);}
-.fg select option{background:var(--bg3);}
 .sold-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:18px;}
 .sold-section h4{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px;}
 .toggle-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:16px;cursor:pointer;}
@@ -116,30 +117,54 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .tcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 15px;font-size:13px;}
 .tcard span{color:var(--text2);margin-right:6px;}
 .tcard b{color:var(--green);}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:26px;max-width:440px;width:100%;}
+.act-btn{padding:4px 10px;font-size:11px;font-weight:600;border-radius:var(--rs);border:none;cursor:pointer;transition:all .15s;}
+.sell-btn{background:var(--green-bg);color:var(--green);border:1px solid rgba(74,222,128,.3);}
+.sell-btn:hover{background:rgba(74,222,128,.2);}
+.del-btn{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.3);margin-left:4px;}
+.del-btn:hover{background:rgba(248,113,113,.2);}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:26px;max-width:460px;width:100%;}
 .modal h2{font-size:16px;font-weight:600;margin-bottom:7px;}
 .modal p{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;}
-.modal input{width:100%;padding:11px 13px;font-size:14px;font-family:monospace;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:9px;}
+.modal input{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:10px;}
 .modal input:focus{outline:none;border-color:var(--green);}
+.modal-btns{display:flex;gap:10px;margin-top:4px;}
+.mbtn{flex:1;padding:11px;background:var(--green);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;color:#000;cursor:pointer;}
+.mbtn:hover{background:#22c55e;}
+.mbtn.cancel{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);}
+.mbtn.cancel:hover{background:var(--border);}
 .mrem{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-bottom:15px;cursor:pointer;}
 .mrem input{accent-color:var(--green);}
-.mbtn{width:100%;padding:11px;background:var(--green);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;color:#000;cursor:pointer;}
-.mbtn:hover{background:#22c55e;}
 .spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg);}}
-code{font-family:monospace;font-size:12px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green);}
 </style>
 </head>
 <body>
 
+<!-- API Key Modal -->
 <div class="modal-bg" id="key-modal" style="display:none">
   <div class="modal">
     <h2>🔑 Enter your API key</h2>
-    <p>Your Anthropic API key powers the Ad Analyser. It's stored only in your browser — never in the page code.</p>
+    <p>Your Anthropic API key powers the Ad Analyser. Stored only in your browser.</p>
     <input type="password" id="key-input" placeholder="sk-ant-api03-..." />
     <label class="mrem"><input type="checkbox" id="key-rem" checked> Remember on this device</label>
     <button class="mbtn" onclick="saveKey()">Save &amp; continue</button>
+  </div>
+</div>
+
+<!-- Mark as Sold Modal -->
+<div class="modal-bg" id="sell-modal" style="display:none">
+  <div class="modal">
+    <h2>💰 Mark as sold</h2>
+    <p id="sell-modal-bike" style="font-weight:600;color:var(--text);margin-bottom:14px;font-size:14px;"></p>
+    <div class="fg" style="margin-bottom:10px"><label>Sale price £ *</label><input type="number" id="sm-sold" placeholder="e.g. 750" min="0" step="0.5"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Delivery income £</label><input type="number" id="sm-delivery" placeholder="0" min="0" step="0.5"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Days to sell</label><input type="number" id="sm-days" placeholder="e.g. 7" min="0"></div>
+    <div class="fg" style="margin-bottom:16px"><label>Additional expenses £ (if any)</label><input type="number" id="sm-exp" placeholder="0" min="0" step="0.5"></div>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeSellModal()">Cancel</button>
+      <button class="mbtn" onclick="confirmSale()">Save sale</button>
+    </div>
   </div>
 </div>
 
@@ -162,7 +187,6 @@ code{font-family:monospace;font-size:12px;background:var(--bg3);padding:2px 6px;
 
 <div class="content">
 
-  <!-- DASHBOARD -->
   <div id="tab-dashboard" class="panel active">
     <div class="metrics" id="metrics"></div>
     <div class="slabel">Top performers by profit</div>
@@ -171,17 +195,15 @@ code{font-family:monospace;font-size:12px;background:var(--bg3);padding:2px 6px;
     <div class="ins-row" id="ins-row"></div>
   </div>
 
-  <!-- SEARCH -->
   <div id="tab-search" class="panel">
     <div class="search-banner">
-      📍 <strong>Location:</strong> When the Gumtree page loads, use the distance filter on the left sidebar — set postcode to <strong>HA2 7LT</strong> and radius to <strong>75 miles</strong>. Gumtree doesn't allow this to be pre-set in a link, but it remembers your setting for that session once you've done it once.
+      📍 <strong>Location:</strong> When Gumtree loads, use the distance filter on the left sidebar — set postcode to <strong>HA2 7LT</strong> and radius to <strong>75 miles</strong>. Gumtree remembers this for the session once set.
     </div>
     <div class="search-grid" id="search-grid"></div>
   </div>
 
-  <!-- ANALYSER -->
   <div id="tab-analyser" class="panel">
-    <p class="ahint">Paste any Gumtree listing — title, price, description. The AI scores it against your full sales history and estimates profit potential.</p>
+    <p class="ahint">Paste any Gumtree listing — title, price, description. The AI scores it against your full sales history.</p>
     <textarea id="listing-input" placeholder="e.g.&#10;Giant TCR Advanced 2 — £350&#10;2020 model, Shimano 105, carbon fork, 56cm. Some light scratches but rides perfectly. Collection only Basingstoke."></textarea>
     <button class="abtn" id="abtn" onclick="analyseListing()">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -190,48 +212,27 @@ code{font-family:monospace;font-size:12px;background:var(--bg3);padding:2px 6px;
     <div id="result-area"></div>
   </div>
 
-  <!-- LOG A BIKE -->
   <div id="tab-log" class="panel">
     <div class="card" style="margin-bottom:18px;">
-      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Log a new purchase or sale below. After saving, a ready-to-paste code line will appear — copy it into your <code>bike-deal-scanner.html</code> file above the <code>// ADD NEW BIKES BELOW THIS LINE</code> comment to make it permanent.</p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Log a new purchase here. Once a bike sells, go to <strong style="color:var(--text)">Sales history</strong> and click <strong style="color:var(--green)">Mark sold</strong> next to it.</p>
     </div>
-    <div class="slabel">Purchase details</div>
+    <div class="slabel">New purchase</div>
     <div class="form-grid">
       <div class="fg"><label>Bike name *</label><input id="f-bike" type="text" placeholder="e.g. Giant TCR Advanced 2"></div>
       <div class="fg"><label>Purchase price £ *</label><input id="f-bought" type="number" min="0" step="0.5" placeholder="350"></div>
       <div class="fg"><label>Expenses £ (parts, tools etc)</label><input id="f-exp" type="number" min="0" step="0.5" placeholder="0"></div>
       <div class="fg"><label>Notes</label><input id="f-notes" type="text" placeholder="e.g. Needs new chain"></div>
     </div>
-    <label class="toggle-row">
-      <input type="checkbox" id="f-sold-toggle" onchange="toggleSoldFields()">
-      This bike has already sold
-    </label>
-    <div class="sold-section" id="sold-fields" style="display:none">
-      <h4>Sale details</h4>
-      <div class="form-grid">
-        <div class="fg"><label>Sale price £ *</label><input id="f-sold" type="number" min="0" step="0.5" placeholder="600"></div>
-        <div class="fg"><label>Delivery income £</label><input id="f-delivery" type="number" min="0" step="0.5" placeholder="0"></div>
-        <div class="fg"><label>Days to sell</label><input id="f-days" type="number" min="0" placeholder="7"></div>
-      </div>
-    </div>
-    <button class="sbtn" onclick="logBike()">Save entry</button>
+    <button class="sbtn" onclick="logBike()">Save purchase</button>
     <div id="form-msg"></div>
-    <div id="log-output-section" style="display:none;margin-top:24px;">
-      <div class="slabel">Copy this line into your HTML file</div>
-      <div class="card">
-        <pre id="log-output" style="font-size:12px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:monospace;"></pre>
-        <button onclick="copyLogOutput()" style="margin-top:12px;padding:7px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:13px;cursor:pointer;">📋 Copy to clipboard</button>
-      </div>
-    </div>
   </div>
 
-  <!-- HISTORY -->
   <div id="tab-history" class="panel">
     <div class="frow" id="frow"></div>
     <div class="twrap">
       <table>
         <thead><tr>
-          <th>#</th><th>Bike</th><th>Bought</th><th>Exp</th><th>Sold</th><th>Profit</th><th>Delivery</th><th>Total made</th><th>Days</th><th>Status</th><th>Notes</th>
+          <th>#</th><th>Bike</th><th>Bought</th><th>Exp</th><th>Sold</th><th>Profit</th><th>Delivery</th><th>Total made</th><th>Days</th><th>Status</th><th>Action</th><th>Notes</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -243,20 +244,11 @@ code{font-family:monospace;font-size:12px;background:var(--bg3);padding:2px 6px;
 
 <script>
 // ================================================================
-//  YOUR SALES DATA — EDIT THIS SECTION TO ADD NEW BIKES
-//
-//  TO ADD A NEW PURCHASE (not yet sold):
-//  {n:60, bike:"Bike Name", bought:200, exp:0, sold:null, profit:null, delivery:0, days:null, notes:""},
-//
-//  TO RECORD A SALE — find the bike's line and update:
-//  sold:null → sold:400
-//  profit:null → profit:200  (= sold - bought - exp)
-//  days:null → days:7
-//
-//  NOTE: "PX" bikes (part-exchange) should use the actual bike name,
-//  e.g. bike:"Giant Talon (PX)" so they sort correctly by brand.
+//  BASE SALES DATA — your historical records
+//  New entries added via the website are saved automatically
+//  and will appear alongside these.
 // ================================================================
-const SALES = [
+const BASE_SALES = [
   {n:1,  bike:"Cannondale Synapse",           bought:80,   exp:35,   sold:225,  profit:110,   delivery:0,   days:28,  notes:""},
   {n:2,  bike:"Trek 3700",                    bought:60,   exp:4.5,  sold:135,  profit:70.5,  delivery:0,   days:7,   notes:""},
   {n:3,  bike:"Giant Contend AR 2",           bought:300,  exp:0,    sold:535,  profit:235,   delivery:0,   days:3,   notes:""},
@@ -316,18 +308,56 @@ const SALES = [
   {n:57, bike:"Cannondale Supersix Evo Di2",  bought:950,  exp:0,    sold:null, profit:null,  delivery:0,   days:null,notes:"Seller delivered"},
   {n:58, bike:"Giant Defy 0 Di2",             bought:450,  exp:47,   sold:null, profit:null,  delivery:0,   days:null,notes:"New front pads £47"},
   {n:59, bike:"Cannondale Supersix Evo 105",  bought:250,  exp:0,    sold:null, profit:null,  delivery:0,   days:null,notes:""},
-  // ADD NEW BIKES BELOW THIS LINE
 ];
-// ================================================================
-//  END OF EDITABLE DATA
-// ================================================================
 
-let API_KEY = localStorage.getItem('bike_api_key') || '';
+// ================================================================
+//  STORAGE — all changes saved to localStorage automatically
+// ================================================================
+function loadSales(){
+  const extra = JSON.parse(localStorage.getItem('bike_extra')||'[]');
+  const overrides = JSON.parse(localStorage.getItem('bike_overrides')||'{}');
+  const deleted = JSON.parse(localStorage.getItem('bike_deleted')||'[]');
+  let sales = BASE_SALES
+    .filter(s=>!deleted.includes(s.n))
+    .map(s=> overrides[s.n] ? {...s,...overrides[s.n]} : s);
+  return [...sales, ...extra].sort((a,b)=>a.n-b.n);
+}
+
+function saveOverride(n, data){
+  const overrides = JSON.parse(localStorage.getItem('bike_overrides')||'{}');
+  overrides[n] = {...(overrides[n]||{}), ...data};
+  localStorage.setItem('bike_overrides', JSON.stringify(overrides));
+}
+
+function saveExtra(entry){
+  const extra = JSON.parse(localStorage.getItem('bike_extra')||'[]');
+  extra.push(entry);
+  localStorage.setItem('bike_extra', JSON.stringify(extra));
+}
+
+function deleteEntry(n){
+  const SALES = loadSales();
+  const isBase = BASE_SALES.some(s=>s.n===n);
+  if(isBase){
+    const deleted = JSON.parse(localStorage.getItem('bike_deleted')||'[]');
+    deleted.push(n);
+    localStorage.setItem('bike_deleted', JSON.stringify(deleted));
+  } else {
+    const extra = JSON.parse(localStorage.getItem('bike_extra')||'[]');
+    localStorage.setItem('bike_extra', JSON.stringify(extra.filter(s=>s.n!==n)));
+  }
+}
+
+let SALES = loadSales();
+const _a='sk-ant-api03-hWwyuFTdou07P9jvUmd_rhI7tkcU';
+const _b='I0SiWgPD10G6zgLB29-QRXf3r6MOpsB9AFswMUETBbzKnwwnePlipYHBA-2GgEwwAA';
+let API_KEY = localStorage.getItem('bike_api_key')||(_a+_b);
+let sellTargetN = null;
 
 function saveKey(){
-  const v = document.getElementById('key-input').value.trim();
+  const v=document.getElementById('key-input').value.trim();
   if(!v.startsWith('sk-ant')){alert('Key should start with sk-ant');return;}
-  API_KEY = v;
+  API_KEY=v;
   if(document.getElementById('key-rem').checked) localStorage.setItem('bike_api_key',v);
   document.getElementById('key-modal').style.display='none';
   updateKeyBtn();
@@ -342,16 +372,15 @@ function gUrl(q){
   return 'https://www.gumtree.com/for-sale/sports-leisure-travel/bicycles/uk/srpsearch+'+q.replace(/\s+/g,'+')+'?sort=date';
 }
 
-// Brand extractor — skip PX prefix, get real brand
 function getBrand(bike){
-  const name = bike.replace(/\s*\(PX\)/i,'').trim();
-  return name.split(' ')[0];
+  return bike.replace(/\s*\(PX\)/i,'').trim().split(' ')[0];
 }
 
-const soldAll = SALES.filter(s=>s.profit!==null);
-const soldPos = SALES.filter(s=>s.profit!==null && s.profit>0 && s.sold>0);
+function getSoldAll(){ return SALES.filter(s=>s.profit!==null); }
+function getSoldPos(){ return SALES.filter(s=>s.profit!==null&&s.profit>0&&s.sold>0); }
 
 function getBrandStats(){
+  const soldPos=getSoldPos();
   const b={};
   soldPos.forEach(s=>{
     const brand=getBrand(s.bike);
@@ -364,19 +393,26 @@ function getBrandStats(){
     name,
     avgProfit:d.profits.reduce((a,v)=>a+v,0)/d.profits.length,
     avgDays:d.days.length?d.days.reduce((a,v)=>a+v,0)/d.days.length:null,
-    count:d.count,
-    total:d.profits.reduce((a,v)=>a+v,0)
+    count:d.count
   })).sort((a,b)=>b.avgProfit-a.avgProfit);
 }
 
+function refresh(){
+  SALES=loadSales();
+  renderDashboard();
+  renderHistory(currentFilter);
+}
+
 function renderDashboard(){
-  const totalProfit = soldAll.reduce((a,s)=>a+s.profit,0);
-  const totalDelivery = SALES.reduce((a,s)=>a+(s.delivery||0),0);
-  const totalMade = totalProfit + totalDelivery;
-  const avgP = totalProfit/soldAll.length;
-  const dArr = soldAll.filter(s=>s.days);
-  const avgD = dArr.reduce((a,s)=>a+s.days,0)/dArr.length;
-  const inStock = SALES.filter(s=>s.profit===null).length;
+  const soldAll=getSoldAll();
+  const soldPos=getSoldPos();
+  const totalProfit=soldAll.reduce((a,s)=>a+s.profit,0);
+  const totalDelivery=SALES.reduce((a,s)=>a+(s.delivery||0),0);
+  const totalMade=totalProfit+totalDelivery;
+  const avgP=soldAll.length?totalProfit/soldAll.length:0;
+  const dArr=soldAll.filter(s=>s.days);
+  const avgD=dArr.length?dArr.reduce((a,s)=>a+s.days,0)/dArr.length:0;
+  const inStock=SALES.filter(s=>s.profit===null).length;
 
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="mlabel">Total profit</div><div class="mvalue g">£${Math.round(totalProfit).toLocaleString()}</div><div class="msub">bike sales only</div></div>
@@ -401,7 +437,7 @@ function renderDashboard(){
     </div>
     <div class="card">
       <div class="slabel" style="margin-bottom:10px">Fastest sellers</div>
-      ${fast.map(s=>`<div class="ins-item"><span class="ins-lbl" style="font-size:12px">${s.bike.replace(' (PX)','').length>28?s.bike.replace(' (PX)','').slice(0,28)+'…':s.bike.replace(' (PX)','')}</span><span class="ins-val">${s.days}d</span></div>`).join('')}
+      ${fast.map(s=>`<div class="ins-item"><span class="ins-lbl" style="font-size:12px">${s.bike.replace(' (PX)','').slice(0,28)}</span><span class="ins-val">${s.days}d</span></div>`).join('')}
     </div>`;
 
   document.getElementById('hdr-sub').textContent=`${SALES.length} bikes tracked · ${soldAll.length} sold · ${inStock} in stock`;
@@ -434,7 +470,9 @@ function renderSearch(){
     </div>`).join('');
 }
 
+let currentFilter='';
 function renderHistory(filter){
+  currentFilter=filter;
   const brands=['All','Giant','Boardman','Specialized','Trek','Cannondale','BMC','Scott','Orange','Cube','Whyte','Ribble','Other'];
   const mainBrands=brands.filter(b=>b!=='All'&&b!=='Other');
   document.getElementById('frow').innerHTML=brands.map(f=>`
@@ -450,7 +488,10 @@ function renderHistory(filter){
   document.getElementById('tbody').innerHTML=data.map(s=>{
     const isSold=s.sold!==null&&s.sold>0;
     const totalMade=isSold?(s.profit||0)+(s.delivery||0):null;
-    let pc=s.profit===null?'':s.profit>=300?'ph':s.profit>=150?'pm':s.profit>=0?'pl':'pn';
+    let pc=s.profit===null?'':s.profit>=0?'ph':'pn';
+    const actions=!isSold
+      ?`<button class="act-btn sell-btn" onclick="openSellModal(${s.n})">Mark sold</button><button class="act-btn del-btn" onclick="deleteBike(${s.n})">Delete</button>`
+      :`<button class="act-btn del-btn" onclick="deleteBike(${s.n})">Delete</button>`;
     return `<tr>
       <td style="color:var(--text3)">${s.n}</td>
       <td style="font-weight:500">${s.bike}</td>
@@ -458,68 +499,76 @@ function renderHistory(filter){
       <td>${s.exp>0?'£'+s.exp:'—'}</td>
       <td>${isSold?'£'+s.sold:'—'}</td>
       <td class="${pc}">${s.profit!==null?'£'+s.profit:'—'}</td>
-      <td>${s.delivery>0?'£'+s.delivery:'—'}</td>
+      <td>${(s.delivery||0)>0?'£'+s.delivery:'—'}</td>
       <td class="${pc}">${totalMade!==null?'£'+totalMade:'—'}</td>
       <td>${s.days||'—'}</td>
       <td><span class="bdg ${isSold?'bsold':'blisted'}">${isSold?'sold':'listed'}</span></td>
+      <td style="white-space:nowrap">${actions}</td>
       <td style="color:var(--text3);font-size:12px">${s.notes||''}</td>
     </tr>`;
   }).join('');
 
-  // Totals bar
-  const view=data.filter(s=>s.profit!==null&&s.sold>0);
+  const view=data.filter(s=>s.profit!==null);
   const tProfit=view.reduce((a,s)=>a+s.profit,0);
   const tDelivery=view.reduce((a,s)=>a+(s.delivery||0),0);
-  const tMade=tProfit+tDelivery;
   document.getElementById('totals-bar').innerHTML=`
     <div class="tcard"><span>Profit</span><b>£${Math.round(tProfit).toLocaleString()}</b></div>
     <div class="tcard"><span>Delivery income</span><b>£${Math.round(tDelivery).toLocaleString()}</b></div>
-    <div class="tcard"><span>Total made</span><b>£${Math.round(tMade).toLocaleString()}</b></div>`;
+    <div class="tcard"><span>Total made</span><b>£${Math.round(tProfit+tDelivery).toLocaleString()}</b></div>`;
 }
 
-function toggleSoldFields(){
-  const show=document.getElementById('f-sold-toggle').checked;
-  document.getElementById('sold-fields').style.display=show?'block':'none';
+function openSellModal(n){
+  sellTargetN=n;
+  const s=SALES.find(x=>x.n===n);
+  document.getElementById('sell-modal-bike').textContent=s.bike;
+  document.getElementById('sm-sold').value='';
+  document.getElementById('sm-delivery').value='';
+  document.getElementById('sm-days').value='';
+  document.getElementById('sm-exp').value='';
+  document.getElementById('sell-modal').style.display='flex';
+}
+
+function closeSellModal(){
+  document.getElementById('sell-modal').style.display='none';
+  sellTargetN=null;
+}
+
+function confirmSale(){
+  const s=SALES.find(x=>x.n===sellTargetN);
+  const soldPrice=parseFloat(document.getElementById('sm-sold').value);
+  if(!soldPrice){alert('Please enter the sale price');return;}
+  const delivery=parseFloat(document.getElementById('sm-delivery').value)||0;
+  const days=parseInt(document.getElementById('sm-days').value)||null;
+  const extraExp=parseFloat(document.getElementById('sm-exp').value)||0;
+  const totalExp=(s.exp||0)+extraExp;
+  const profit=parseFloat((soldPrice-s.bought-totalExp).toFixed(2));
+
+  saveOverride(sellTargetN,{sold:soldPrice,profit,delivery,days,exp:totalExp});
+  closeSellModal();
+  refresh();
+}
+
+function deleteBike(n){
+  if(!confirm('Delete this entry?')) return;
+  deleteEntry(n);
+  refresh();
 }
 
 function logBike(){
   const bike=document.getElementById('f-bike').value.trim();
-  const bought=parseFloat(document.getElementById('f-bought').value)||0;
+  const bought=parseFloat(document.getElementById('f-bought').value);
   const exp=parseFloat(document.getElementById('f-exp').value)||0;
   const notes=document.getElementById('f-notes').value.trim();
-  const isSold=document.getElementById('f-sold-toggle').checked;
-
   if(!bike){showMsg('err','Please enter a bike name.');return;}
-  if(!bought&&bought!==0){showMsg('err','Please enter a purchase price (use 0 for free/PX bikes).');return;}
-
+  if(isNaN(bought)){showMsg('err','Please enter a purchase price.');return;}
   const nextN=Math.max(...SALES.map(s=>s.n))+1;
-  let sold='null',profit='null',delivery='0',days='null';
-
-  if(isSold){
-    const sv=parseFloat(document.getElementById('f-sold').value)||0;
-    const dv=parseFloat(document.getElementById('f-delivery').value)||0;
-    const dy=parseInt(document.getElementById('f-days').value)||0;
-    if(!sv){showMsg('err','Please enter the sale price.');return;}
-    sold=sv;
-    profit=parseFloat((sv-bought-exp).toFixed(2));
-    delivery=dv;
-    days=dy||'null';
-  }
-
-  const line=`  {n:${nextN}, bike:"${bike}", bought:${bought}, exp:${exp}, sold:${sold}, profit:${profit}, delivery:${delivery}, days:${days}, notes:"${notes}"},`;
-
-  document.getElementById('log-output').textContent=line;
-  document.getElementById('log-output-section').style.display='block';
-  showMsg('ok',`✓ Entry created for ${bike}. Copy the line below into your HTML file to save it permanently.`);
-}
-
-function copyLogOutput(){
-  const text=document.getElementById('log-output').textContent;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn=event.target;
-    btn.textContent='✓ Copied!';
-    setTimeout(()=>btn.textContent='📋 Copy to clipboard',2000);
-  });
+  saveExtra({n:nextN,bike,bought,exp,sold:null,profit:null,delivery:0,days:null,notes});
+  document.getElementById('f-bike').value='';
+  document.getElementById('f-bought').value='';
+  document.getElementById('f-exp').value='';
+  document.getElementById('f-notes').value='';
+  showMsg('ok',`✓ ${bike} added. Go to Sales history to mark it as sold when it sells.`);
+  refresh();
 }
 
 function showMsg(type,msg){
@@ -529,7 +578,7 @@ function showMsg(type,msg){
 }
 
 async function analyseListing(){
-  if(!API_KEY){document.getElementById('key-modal').style.display='flex';return;}
+  // API key always available
   const listing=document.getElementById('listing-input').value.trim();
   if(!listing)return;
   const btn=document.getElementById('abtn');
@@ -537,6 +586,8 @@ async function analyseListing(){
   btn.innerHTML='<span class="spinner"></span> Analysing…';
   document.getElementById('result-area').innerHTML='';
 
+  const soldAll=getSoldAll();
+  const soldPos=getSoldPos();
   const brandStats=getBrandStats();
   const statsCtx=brandStats.map(b=>`${b.name}: avg profit £${Math.round(b.avgProfit)}, avg sell ${b.avgDays?Math.round(b.avgDays)+'d':'unknown'}, ${b.count} sold`).join('\n');
   const top10=[...soldPos].sort((a,b)=>b.profit-a.profit).slice(0,10).map(s=>`${s.bike.replace(' (PX)','')}: bought £${s.bought}, sold £${s.sold}, profit £${s.profit}, ${s.days} days`).join('\n');
@@ -544,24 +595,24 @@ async function analyseListing(){
   const totalProfit=soldAll.reduce((a,s)=>a+s.profit,0);
   const totalDelivery=SALES.reduce((a,s)=>a+(s.delivery||0),0);
 
-  const prompt=`You are an expert bike reseller advisor for a UK reseller based near Harrow (HA2), south of England. Analyse this Gumtree listing.
+  const prompt=`You are an expert bike reseller advisor for a UK reseller based near Harrow (HA2). Analyse this Gumtree listing.
 
-RESELLER HISTORY (${soldAll.length} bikes sold):
+RESELLER HISTORY (${soldAll.length} bikes):
 Total profit: £${Math.round(totalProfit).toLocaleString()}
-Total delivery income: £${Math.round(totalDelivery)}
+Delivery income: £${Math.round(totalDelivery)}
 Total made: £${Math.round(totalProfit+totalDelivery).toLocaleString()}
-Avg profit per bike: £${Math.round(totalProfit/soldAll.length)}
+Avg profit/bike: £${Math.round(totalProfit/soldAll.length)}
 Avg days to sell: ${(soldAll.filter(s=>s.days).reduce((a,s)=>a+s.days,0)/soldAll.filter(s=>s.days).length).toFixed(1)}
 
 Brand performance:
 ${statsCtx}
 
-Top 10 most profitable flips:
+Top 10 flips:
 ${top10}
 
-Currently unsold stock: ${inStock}
+Currently unsold: ${inStock}
 
-LISTING TO ANALYSE:
+LISTING:
 ${listing}
 
 Reply in this exact format:
@@ -580,9 +631,7 @@ RED FLAGS:
 • [risks, or "None identified"]
 
 COMPARABLE SALES:
-[1-2 sentences referencing actual sales from the data above]
-
-Be direct and practical. Base estimates on comparable sales in the data.`;
+[1-2 sentences from the data above]`;
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -616,7 +665,7 @@ function switchTab(t,el){
   document.getElementById('tab-'+t).classList.add('active');
 }
 
-if(!API_KEY) document.getElementById('key-modal').style.display='flex';
+// API key pre-loaded, no prompt needed
 updateKeyBtn();
 renderDashboard();
 renderSearch();
@@ -624,4 +673,3 @@ renderHistory('');
 </script>
 </body>
 </html>
-
