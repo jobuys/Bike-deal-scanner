@@ -82,13 +82,9 @@ textarea::placeholder{color:var(--text3);}
 @media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
 .fg{display:flex;flex-direction:column;gap:5px;}
 .fg label{font-size:12px;font-weight:500;color:var(--text2);}
-.fg input,.fg select{padding:9px 12px;font-size:14px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);transition:border-color .15s;}
-.fg input:focus,.fg select:focus{outline:none;border-color:var(--green);}
+.fg input{padding:9px 12px;font-size:14px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);transition:border-color .15s;}
+.fg input:focus{outline:none;border-color:var(--green);}
 .fg input::placeholder{color:var(--text3);}
-.sold-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:18px;}
-.sold-section h4{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px;}
-.toggle-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:16px;cursor:pointer;}
-.toggle-row input{accent-color:var(--green);width:15px;height:15px;}
 .sbtn{padding:10px 22px;background:var(--green);border:none;border-radius:var(--rs);font-size:14px;font-weight:600;color:#000;cursor:pointer;transition:all .15s;}
 .sbtn:hover{background:#22c55e;}
 .fmsg{margin-top:11px;font-size:13px;padding:10px 14px;border-radius:var(--rs);}
@@ -116,6 +112,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .act-btn{padding:4px 10px;font-size:11px;font-weight:600;border-radius:var(--rs);border:none;cursor:pointer;transition:all .15s;}
 .sell-btn{background:var(--green-bg);color:var(--green);border:1px solid rgba(74,222,128,.3);}
 .sell-btn:hover{background:rgba(74,222,128,.2);}
+.edit-btn{background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);margin-left:4px;}
+.edit-btn:hover{background:rgba(96,165,250,0.2);}
 .del-btn{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.3);margin-left:4px;}
 .del-btn:hover{background:rgba(248,113,113,.2);}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
@@ -158,6 +156,20 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="modal-btns">
       <button class="mbtn cancel" onclick="closeSellModal()">Cancel</button>
       <button class="mbtn" onclick="confirmSale()">Save sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="edit-modal" style="display:none">
+  <div class="modal">
+    <h2>✏️ Edit entry</h2>
+    <p id="edit-modal-bike" style="font-weight:600;color:var(--text);margin-bottom:14px;font-size:14px;"></p>
+    <div class="fg" style="margin-bottom:10px"><label>Notes</label><input type="text" id="em-notes" placeholder="e.g. Gear service, bar tape"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Expenses £</label><input type="number" id="em-exp" min="0" step="0.5"></div>
+    <div class="fg" style="margin-bottom:16px"><label>Delivery income £</label><input type="number" id="em-delivery" min="0" step="0.5"></div>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="mbtn" onclick="confirmEdit()">Save changes</button>
     </div>
   </div>
 </div>
@@ -208,7 +220,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
   <div id="tab-log" class="panel">
     <div class="card" style="margin-bottom:18px;">
-      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Log a new purchase here. Once a bike sells, go to <strong style="color:var(--text)">Sales history</strong> and click <strong style="color:var(--green)">Mark sold</strong> next to it.</p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Log a new purchase here. Once a bike sells, go to <strong style="color:var(--text)">Sales history</strong> and click <strong style="color:var(--green)">Mark sold</strong> next to it. Use <strong style="color:#60a5fa">Edit</strong> to update notes or expenses at any time.</p>
     </div>
     <div class="slabel">New purchase</div>
     <div class="form-grid">
@@ -226,7 +238,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="twrap">
       <table>
         <thead><tr>
-          <th>#</th><th>Bike</th><th>Bought</th><th>Exp</th><th>Sold</th><th>Profit</th><th>Delivery</th><th>Total made</th><th>Days</th><th>Status</th><th>Action</th><th>Notes</th>
+          <th>#</th><th>Bike</th><th>Bought</th><th>Exp</th><th>Sold</th><th>Profit</th><th>Delivery</th><th>Total made</th><th>Days</th><th>Status</th><th>Actions</th><th>Notes</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -330,12 +342,15 @@ function deleteEntry(n){
   }
 }
 
-(function(){const o=JSON.parse(localStorage.getItem("bike_overrides")||"{}");if(o[47]){delete o[47];localStorage.setItem("bike_overrides",JSON.stringify(o));}}());
+// Clear any bad override for Giant Roam 0 (#47)
+(function(){const o=JSON.parse(localStorage.getItem('bike_overrides')||'{}');if(o[47]){delete o[47];localStorage.setItem('bike_overrides',JSON.stringify(o));}}());
+
 let SALES=loadSales();
 const _a='sk-ant-api03-hWwyuFTdou07P9jvUmd_rhI7tkcU';
 const _b='I0SiWgPD10G6zgLB29-QRXf3r6MOpsB9AFswMUETBbzKnwwnePlipYHBA-2GgEwwAA';
 let API_KEY=localStorage.getItem('bike_api_key')||(_a+_b);
 let sellTargetN=null;
+let editTargetN=null;
 
 function saveKey(){
   const v=document.getElementById('key-input').value.trim();
@@ -413,18 +428,18 @@ function renderDashboard(){
 
 function renderSearch(){
   const searches=[
-    {name:"Giant TCR Advanced",       q:"Giant TCR Advanced",       reason:"Your #1 category. Three sold for £420–600 profit.",        profit:"£420–600"},
-    {name:"Cannondale Topstone",      q:"Cannondale Topstone",      reason:"Topstone 3 & 4 returned £437–700 profit. Fast flips.",     profit:"£437–700"},
-    {name:"Ribble road / gravel",     q:"Ribble road bike",         reason:"Ribble Gravel AL: £630 profit + £200 delivery in 6 days.", profit:"£630+"},
-    {name:"BMC road bike",            q:"BMC road bike",            reason:"Both BMCs sold for £400+. High floor, low competition.",   profit:"£400+"},
-    {name:"Cannondale road / gravel", q:"Cannondale road bike",     reason:"CAAD12 £309, Bad Boy £400. Strong brand recognition.",     profit:"£309–400"},
-    {name:"Specialized Sirrus X",     q:"Specialized Sirrus X",     reason:"Multiple sales at £200–264 profit. Reliable flipper.",     profit:"£200–264"},
-    {name:"Giant Contend / AR",       q:"Giant Contend road bike",  reason:"£165–250 profit, often selling in 1–3 days.",              profit:"£165–250"},
-    {name:"Boardman hybrid / SLR",    q:"Boardman hybrid road bike",reason:"Low buy-in. CX Comp £250, SLR £179, hybrids £150+.",      profit:"£150–260"},
-    {name:"Trek Domane AL",           q:"Trek Domane AL",           reason:"Two sold for £130–293 profit. Trusted brand.",             profit:"£130–293"},
-    {name:"Giant Fathom / Roam",      q:"Giant Fathom Roam",        reason:"Fathom £250–319, Roam £165–208. Quick sellers.",           profit:"£165–319"},
-    {name:"Cube road / MTB",          q:"Cube reaction race road",  reason:"Cube Reaction Race: £350 profit in 16 days.",              profit:"£350"},
-    {name:"Orange / Whyte MTB",       q:"Orange Whyte mountain bike",reason:"Orange Crush £300. Whyte 901 in stock — strong MTB brands.",profit:"£300+"},
+    {name:"Giant TCR Advanced",       q:"Giant TCR Advanced",        reason:"Your #1 category. Three sold for £420–600 profit.",        profit:"£420–600"},
+    {name:"Cannondale Topstone",      q:"Cannondale Topstone",       reason:"Topstone 3 & 4 returned £437–700 profit. Fast flips.",     profit:"£437–700"},
+    {name:"Ribble road / gravel",     q:"Ribble road bike",          reason:"Ribble Gravel AL: £630 profit + £200 delivery in 6 days.", profit:"£630+"},
+    {name:"BMC road bike",            q:"BMC road bike",             reason:"Both BMCs sold for £400+. High floor, low competition.",   profit:"£400+"},
+    {name:"Cannondale road / gravel", q:"Cannondale road bike",      reason:"CAAD12 £309, Bad Boy £400. Strong brand recognition.",     profit:"£309–400"},
+    {name:"Specialized Sirrus X",     q:"Specialized Sirrus X",      reason:"Multiple sales at £200–264 profit. Reliable flipper.",     profit:"£200–264"},
+    {name:"Giant Contend / AR",       q:"Giant Contend road bike",   reason:"£165–250 profit, often selling in 1–3 days.",              profit:"£165–250"},
+    {name:"Boardman hybrid / SLR",    q:"Boardman hybrid road bike", reason:"Low buy-in. CX Comp £250, SLR £179, hybrids £150+.",      profit:"£150–260"},
+    {name:"Trek Domane AL",           q:"Trek Domane AL",            reason:"Two sold for £130–293 profit. Trusted brand.",             profit:"£130–293"},
+    {name:"Giant Fathom / Roam",      q:"Giant Fathom Roam",         reason:"Fathom £250–319, Roam £165–208. Quick sellers.",           profit:"£165–319"},
+    {name:"Cube road / MTB",          q:"Cube reaction race road",   reason:"Cube Reaction Race: £350 profit in 16 days.",              profit:"£350"},
+    {name:"Orange / Whyte MTB",       q:"Orange Whyte mountain bike",reason:"Orange Crush £300. Whyte 901 in stock — strong brands.",   profit:"£300+"},
   ];
   document.getElementById('search-grid').innerHTML=searches.map(s=>`
     <div class="sc">
@@ -457,9 +472,10 @@ function renderHistory(filter){
     const isSold=s.sold!==null&&s.sold>0;
     const totalMade=isSold?(s.profit||0)+(s.delivery||0):null;
     const pc=s.profit===null?'':s.profit>=0?'ph':'pn';
+    const editBtn=`<button class="act-btn edit-btn" onclick="openEditModal(${s.n})">Edit</button>`;
     const actions=!isSold
-      ?`<button class="act-btn sell-btn" onclick="openSellModal(${s.n})">Mark sold</button><button class="act-btn del-btn" onclick="deleteBike(${s.n})">Delete</button>`
-      :`<button class="act-btn del-btn" onclick="deleteBike(${s.n})">Delete</button>`;
+      ?`<button class="act-btn sell-btn" onclick="openSellModal(${s.n})">Mark sold</button>${editBtn}<button class="act-btn del-btn" onclick="deleteBike(${s.n})">Delete</button>`
+      :`${editBtn}<button class="act-btn del-btn" onclick="deleteBike(${s.n})">Delete</button>`;
     return `<tr>
       <td style="color:var(--text3)">${s.n}</td>
       <td style="font-weight:500">${s.bike}</td>
@@ -512,6 +528,31 @@ function confirmSale(){
   closeSellModal();
   refresh();
 }
+
+function openEditModal(n){
+  editTargetN=n;
+  const s=SALES.find(x=>x.n===n);
+  document.getElementById('edit-modal-bike').textContent=s.bike;
+  document.getElementById('em-notes').value=s.notes||'';
+  document.getElementById('em-exp').value=s.exp||0;
+  document.getElementById('em-delivery').value=s.delivery||0;
+  document.getElementById('edit-modal').style.display='flex';
+}
+function closeEditModal(){
+  document.getElementById('edit-modal').style.display='none';
+  editTargetN=null;
+}
+function confirmEdit(){
+  const notes=document.getElementById('em-notes').value.trim();
+  const exp=parseFloat(document.getElementById('em-exp').value)||0;
+  const delivery=parseFloat(document.getElementById('em-delivery').value)||0;
+  const s=SALES.find(x=>x.n===editTargetN);
+  const profit=s.sold!==null&&s.sold>0?parseFloat((s.sold-s.bought-exp).toFixed(2)):s.profit;
+  saveOverride(editTargetN,{notes,exp,delivery,profit});
+  closeEditModal();
+  refresh();
+}
+
 function deleteBike(n){
   if(!confirm('Delete this entry?'))return;
   deleteEntry(n);
@@ -593,5 +634,3 @@ renderHistory('');
 </script>
 </body>
 </html>
-
-
